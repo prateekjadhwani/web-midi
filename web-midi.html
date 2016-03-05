@@ -1,0 +1,79 @@
+<dom-module id="web-midi">
+  <script>
+    Polymer({
+      is: 'web-midi',
+      properties: {
+        midi: {
+          type: Object,
+          notify: true
+        },
+        devices: {
+          type: String,
+          notify: true,
+          reflectToAttribute: false
+        },
+        value: {
+          type: String,
+          value: '',
+          reflectToAttribute: true
+        }
+      },
+      ready: function() {
+        navigator.requestMIDIAccess()
+        .then( (midiAccess, msg)=>{
+          if(!!msg) {
+            this._onMIDIFailure(msg);
+            return;
+          }
+          
+          this._onMIDISuccess(midiAccess);
+        });
+      },
+      _onMIDISuccess: function(midiAccess) {
+        // converts midiAcess to Input and Output devices
+        this.midi = midiAccess;
+        this._listDevices(midiAccess);
+      },
+      _onMIDIFailure: function(msg) {
+        console.log( "Failed to get MIDI access - " + msg );
+      },
+      _listDevices: function(midiAccess) {
+        var inputDevices = [],
+            outputDevices = [];
+        
+        for (var entry of midiAccess.inputs) {
+          var input = entry[1];
+          inputDevices.push({
+            id: input.id,
+            manufacturer: input.manufacturer,
+            name: input.name,
+            version: input.version
+          });
+          input.onmidimessage = this._onMIDIMessage.bind(this);
+        }
+
+        for (var entry of midiAccess.outputs) {
+          var output = entry[1];
+          outputDevices.push({
+            id: output.id,
+            manufacturer: output.manufacturer,
+            name: output.name,
+            version: output.version
+          });
+        }
+        
+        this.devices = new Object();
+        this.devices['input'] = inputDevices;
+        this.devices['output'] = outputDevices;
+      },
+      _onMIDIMessage( event ) {
+        var str = '';
+        for (var i=0; i < event.data.length; i++) {
+          str += event.data[i].toString(16) + " ";
+        }
+        this.value = str;
+        this.fire('change',{value: str});
+      }
+    });
+  </script>
+</dom-module>

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="import" href="bower_components/polymer/polymer.html">
+    <link rel="import" href="web-midi.html">
+  </head>
+  <body>
+    <web-midi></web-midi>
+    <div class="container">
+      <div class="value"></div>
+      <div class="button"></div>
+    </div>
+    <script type="text/javascript">
+      
+      //https://webaudio.github.io/web-midi-api/#examples
+      document.querySelector('web-midi').addEventListener('change', (e)=>{
+        document.querySelector('.value').innerHTML = e.detail.value;
+        
+        var buttonStr = '';
+        switch(e.detail.value) {
+            case '92 24 7f ': 
+              buttonStr = '1x1';
+              break;
+            case '92 25 7f ': 
+              buttonStr = '1x2';
+              break;
+            case '92 26 7f ': 
+              buttonStr = '1x3';
+              break;
+            case '92 27 7f ': 
+              buttonStr = '1x4';
+              break;
+        }
+        document.querySelector('.button').innerHTML = buttonStr;
+      });
+    </script>
+  </body>
+</html>
